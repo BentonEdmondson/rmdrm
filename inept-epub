@@ -8,29 +8,6 @@
 # <http://www.gnu.org/licenses/>
 
 
-# Revision history:
-#   1 - Initial release
-#   2 - Rename to INEPT, fix exit code
-#   5 - Version bump to avoid (?) confusion;
-#       Improve OS X support by using OpenSSL when available
-#   5.1 - Improve OpenSSL error checking
-#   5.2 - Fix ctypes error causing segfaults on some systems
-#   5.3 - add support for OpenSSL on Windows, fix bug with some versions of libcrypto 0.9.8 prior to path level o
-#   5.4 - add support for encoding to 'utf-8' when building up list of files to decrypt from encryption.xml
-#   5.5 - On Windows try PyCrypto first, OpenSSL next
-#   5.6 - Modify interface to allow use with import
-#   5.7 - Fix for potential problem with PyCrypto
-#   5.8 - Revised to allow use in calibre plugins to eliminate need for duplicate code
-#   5.9 - Fixed to retain zip file metadata (e.g. file modification date)
-#   6.0 - moved unicode_argv call inside main for Windows DeDRM compatibility
-#   6.1 - Work if TkInter is missing
-#   6.2 - Handle UTF-8 file names inside an ePub, fix by Jose Luis
-#   6.3 - Add additional check on DER file sanity
-#   6.4 - Remove erroneous check on DER file sanity
-#   6.5 - Completely remove erroneous check on DER file sanity
-#   6.6 - Import tkFileDialog, don't assume something else will import it.
-#   7.0 - Add Python 3 compatibility for calibre 5.0
-
 """
 Decrypt Adobe Digital Editions encrypted ePub books.
 """
@@ -66,45 +43,9 @@ class SafeUnbuffered:
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
-try:
-    from calibre.constants import iswindows, isosx
-except:
-    iswindows = sys.platform.startswith('win')
-    isosx = sys.platform.startswith('darwin')
-
 def unicode_argv():
-    if iswindows:
-        # Uses shell32.GetCommandLineArgvW to get sys.argv as a list of Unicode
-        # strings.
-
-        # Versions 2.x of Python don't support Unicode in sys.argv on
-        # Windows, with the underlying Windows API instead replacing multi-byte
-        # characters with '?'.
-
-
-        from ctypes import POINTER, byref, cdll, c_int, windll
-        from ctypes.wintypes import LPCWSTR, LPWSTR
-
-        GetCommandLineW = cdll.kernel32.GetCommandLineW
-        GetCommandLineW.argtypes = []
-        GetCommandLineW.restype = LPCWSTR
-
-        CommandLineToArgvW = windll.shell32.CommandLineToArgvW
-        CommandLineToArgvW.argtypes = [LPCWSTR, POINTER(c_int)]
-        CommandLineToArgvW.restype = POINTER(LPWSTR)
-
-        cmd = GetCommandLineW()
-        argc = c_int(0)
-        argv = CommandLineToArgvW(cmd, byref(argc))
-        if argc.value > 0:
-            # Remove Python executable and commands if present
-            start = argc.value - len(sys.argv)
-            return [argv[i] for i in
-                    range(start, argc.value)]
-        return ["ineptepub.py"]
-    else:
-        argvencoding = sys.stdin.encoding or "utf-8"
-        return [arg if isinstance(arg, str) else str(arg, argvencoding) for arg in sys.argv]
+    argvencoding = sys.stdin.encoding or "utf-8"
+    return [arg if isinstance(arg, str) else str(arg, argvencoding) for arg in sys.argv]
 
 
 class ADEPTError(Exception):
@@ -115,10 +56,7 @@ def _load_crypto_libcrypto():
         Structure, c_ulong, create_string_buffer, cast
     from ctypes.util import find_library
 
-    if iswindows:
-        libcrypto = find_library('libeay32')
-    else:
-        libcrypto = find_library('crypto')
+    libcrypto = find_library('crypto')
 
     if libcrypto is None:
         raise ADEPTError('libcrypto not found')
