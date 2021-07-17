@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = github:NixOS/nixpkgs/master;
+  inputs.nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
 
   outputs = { self, nixpkgs }: let pkgs = import nixpkgs { system = "x86_64-linux"; }; in {
 
@@ -8,7 +8,7 @@
         pname = "inept-epub";
         version = "7.0";
         src = self;
-        buildInputs = [ pkgs.python3 ];
+        buildInputs = [ (pkgs.python3.withPackages(ps: [ ps.pycrypto ps.pyopenssl ])) ];
         installPhase = ''
             mkdir -p $out/bin
             chmod +x inept-epub
