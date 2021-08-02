@@ -14,6 +14,18 @@
             chmod +x inept-epub
             cp inept-epub $out/bin
         '';
+
+        meta = {
+          description = "A Python script to decrypt Adobe-encrypted EPUB files";
+          homepage = "https://github.com/BentonEdmondson/inept-epub";
+          license = [ nixpkgs.lib.licenses.gpl3Only ];
+          maintainers = [{
+            name = "Benton Edmondson";
+            email = "bentonedmondson@gmail.com";
+          }];
+          # potentially others, but I'm only listed those tested
+          platforms = [ "x86_64-linux" ];
+        };
       };
   };
 }
