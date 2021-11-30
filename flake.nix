@@ -1,28 +1,29 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, ... }@flakes: let
+  outputs = flakes: let
     nixpkgs = flakes.nixpkgs.legacyPackages.x86_64-linux;
   in {
-    defaultPackage.x86_64-linux = nixpkgs.stdenv.mkDerivation {
-      pname = "inept-epub";
-      version = "7.0";
-      src = self;
+    defaultPackage.x86_64-linux = nixpkgs.python3Packages.buildPythonApplication {
+      pname = "rmdrm";
+      version = "0.0.0";
+      src = ./.;
 
-      buildInputs = [
-        (nixpkgs.python3.withPackages(
-          python3Packages: [ python3Packages.pycrypto python3Packages.pyopenssl ]
-        ))
+      propagatedBuildInputs = [
+        nixpkgs.python3Packages.pycrypto
+        nixpkgs.python3Packages.pyopenssl
       ];
+
+      format = "others";
 
       installPhase = ''
           mkdir -p $out/bin
-          chmod +x inept-epub
-          cp inept-epub $out/bin
+          cp {rmdrm-epub,rmdrm-pdf} $out/bin
+          chmod +x $out/bin/*
       '';
 
       meta = {
-        description = "A Python script to decrypt Adobe-encrypted EPUB files";
+        description = "Python scripts to remove DRM from Adobe ADEPT-encrypted files";
         homepage = "https://github.com/BentonEdmondson/inept-epub";
         license = [ nixpkgs.lib.licenses.gpl3Only ];
         maintainers = [{

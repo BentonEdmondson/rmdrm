@@ -21,7 +21,6 @@ import os
 import traceback
 import zlib
 import zipfile
-import base64
 from zipfile import ZipInfo, ZipFile, ZIP_STORED, ZIP_DEFLATED
 from contextlib import closing
 import xml.etree.ElementTree as etree
@@ -401,6 +400,7 @@ def decryptBook(userkey, inpath, outpath):
             return 2
     return 0
 
+import base64
 def extract_key(activation_file):
     tree = etree.parse(activation_file)
     adept = lambda tag: '{%s}%s' % (NSMAP['adept'], tag)
@@ -408,6 +408,7 @@ def extract_key(activation_file):
     userkey = tree.findtext(expr)
     userkey = base64.b64decode(userkey)
     userkey = userkey[26:]
+    print(userkey)
     return userkey
 
 def cli_main():
