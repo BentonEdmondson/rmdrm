@@ -408,7 +408,6 @@ def extract_key(activation_file):
     userkey = tree.findtext(expr)
     userkey = base64.b64decode(userkey)
     userkey = userkey[26:]
-    print(userkey)
     return userkey
 
 def cli_main():
